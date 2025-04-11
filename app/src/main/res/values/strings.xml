@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MediaChallenger</string>
+    <string name="message_service_description">Allow access to the Message Service.</string>
 </resources>

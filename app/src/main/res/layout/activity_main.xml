@@ -7,6 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animationView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:lottie_rawRes="@raw/dancing"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        />
+
     <RelativeLayout
         android:id="@+id/rlt_media_buttons"
         android:layout_width="match_parent"
