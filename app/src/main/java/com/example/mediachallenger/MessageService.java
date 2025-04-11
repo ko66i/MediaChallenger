@@ -35,7 +35,6 @@ public class MessageService extends Service {
             Log.e("MSGRECEIVED", "Play audio");
             if (!mediaPlayer.isPlaying()) {
                 // Inicializa o MediaPlayer
-                mediaPlayer = MediaPlayer.create(MessageService.this, R.raw.test_audio); // Audio para teste
                 mediaPlayer.setLooping(true); // Define para repetir a música
                 mediaPlayer.start(); // Inicia a reprodução
                 return true;
@@ -58,6 +57,7 @@ public class MessageService extends Service {
             Log.e("MSGRECEIVED", "Stop audio");
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
+                mediaPlayer = MediaPlayer.create(MessageService.this, R.raw.test_audio);
                 return true;
             }
             return false;
