@@ -1,0 +1,58 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:id="@+id/rlt_media_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black">
+
+        <Button
+            android:id="@+id/btnPause"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="0dp"
+            android:background="@color/teal_200"
+            android:textColor="@color/black"
+            android:textSize="30sp"
+            tools:ignore="RelativeOverlap" />
+
+        <Button
+            android:id="@+id/btnPlay"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/purple_200"
+            android:textColor="@color/black"
+            android:textSize="30sp"
+            tools:ignore="RelativeOverlap" />
+
+        <Button
+            android:id="@+id/btnStop"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="30dp"
+            android:background="@color/purple_500"
+            android:textColor="@color/black"
+            android:textSize="30sp"
+            tools:ignore="RelativeOverlap" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
