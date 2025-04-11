@@ -33,32 +33,50 @@ public class MessageService extends Service {
         @Override
         public boolean playAudio() throws RemoteException {
             Log.e("MSGRECEIVED", "Play audio");
-            if (!mediaPlayer.isPlaying()) {
-                // Inicializa o MediaPlayer
-                mediaPlayer.setLooping(true); // Define para repetir a música
-                mediaPlayer.start(); // Inicia a reprodução
-                return true;
+            try {
+                if (!mediaPlayer.isPlaying()) {
+                    // Inicializa o MediaPlayer
+                    mediaPlayer.setLooping(true); // Define para repetir a música
+                    mediaPlayer.start(); // Inicia a reprodução
+                    return true;
+                }
+            } catch (IllegalStateException e) {
+                Log.e("AudioError", "Erro ao iniciar o áudio: " + e.getMessage());
+            } catch (Exception e) {
+                Log.e("AudioError", "Erro inesperado: " + e.getMessage());
             }
             return false;
         }
 
         @Override
         public boolean pauseAudio() throws RemoteException {
-            Log.e("MSGRECEIVED", "Pause audio");
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                return true;
+            Log.d("MSGRECEIVED", "Pause audio");
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    return true;
+                }
+            } catch (IllegalStateException e) {
+                Log.e("AudioError", "Erro ao pausar o áudio: " + e.getMessage());
+            } catch (Exception e) {
+                Log.e("AudioError", "Erro inesperado: " + e.getMessage());
             }
             return false;
         }
 
         @Override
         public boolean stopAudio() throws RemoteException {
-            Log.e("MSGRECEIVED", "Stop audio");
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer = MediaPlayer.create(MessageService.this, R.raw.test_audio);
-                return true;
+            Log.d("MSGRECEIVED", "Stop audio");
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer = MediaPlayer.create(MessageService.this, R.raw.test_audio);
+                    return true;
+                }
+            } catch (IllegalStateException e) {
+                Log.e("AudioError", "Erro ao parar o áudio: " + e.getMessage());
+            } catch (Exception e) {
+                Log.e("AudioError", "Erro inesperado: " + e.getMessage());
             }
             return false;
         }
@@ -91,7 +109,6 @@ public class MessageService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand() chamado, intent: " + intent + ", flags: " + flags + ", startId: " + startId);
 
         // Cria uma notificação
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
