@@ -123,7 +123,11 @@ public class MessageService extends Service {
         // Inicia o serviço de primeiro plano
         startForeground(NOTIFICATION_ID, notification);
 
-        return START_STICKY; // Garante que o serviço seja reiniciado se for interrompido
+        // START_STICKY é um tipo de Service que executa tarefas em segundo plano. Esses
+        // Services precisam continuar rodando em segundo plano mesmo que o usuário mude para
+        // outro aplicativo. Ao usar START_STICKY, nós garantimos que o serviço de audio continue
+        // em execução mesmo que ele seja encerrado ou parado.
+        return START_STICKY;
     }
 
     @Override
