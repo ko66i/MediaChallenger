@@ -1,302 +1,156 @@
 package com.example.mediachallenger;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
-import android.media.MediaPlayer;
-import android.media.audiofx.Equalizer;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import androidx.core.app.NotificationCompat;
+import com.example.mediachallenger.equalization.EqualizationModule;
+import com.example.mediachallenger.notification.NotificationModule;
+import com.example.mediachallenger.playback.PlaybackInterface;
+import com.example.mediachallenger.playback.PlaybackModule;
 
 /**
  * Serviço para gerenciar a reprodução de áudio e a equalização.
  */
-public class AudioService extends Service {
+public class AudioService extends Service implements PlaybackInterface {
 
-    private static final String TAG = "MessageService"; // Tag para logs
+    private static final String TAG = "AudioService"; // Tag para logs
     private static final String CHANNEL_ID = "emixer_channel"; // ID do canal de notificação
     private static final int NOTIFICATION_ID = 1; // ID único para a notificação
-    public static final String ACTION_FOREGROUND_SERVICE = "com.example.emixerapp.action.FOREGROUND_SERVICE"; // Ação para iniciar o serviço em primeiro plano
 
-    private MediaPlayer mediaPlayer; // MediaPlayer para reproduzir áudio
-    private Equalizer equalizer; // Equalizador para ajustar o áudio
+    public static final String ACTION_FOREGROUND_SERVICE = "com.example.mediachallenger.action.FOREGROUND_SERVICE"; // Define a ação para o serviço de primeiro plano
+
+
+
+    private PlaybackModule playbackModule; // Objeto PlaybackModule para controlar a reprodução
+    private EqualizationModule equalizationModule; // Objeto EqualizationModule para controlar o equalizador
+    private NotificationModule notificationModule; // Objeto NotificationModule para gerenciar as notificações
 
     // Implementação do Binder para a interface IMessageService
     private final IMessageService.Stub binder = new IMessageService.Stub() {
 
-        /**
-         * Método para iniciar a reprodução de áudio.
-         *
-         * @return true se a reprodução foi iniciada com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public boolean playAudio() throws RemoteException {
-            Log.e("MSGRECEIVED", "Play audio"); // Log para depuração
-            try {
-                if (!mediaPlayer.isPlaying()) {
-                    // Inicializa o MediaPlayer
-                    mediaPlayer.setLooping(true); // Define para repetir a música
-                    mediaPlayer.start(); // Inicia a reprodução
-                    return true; // Indica sucesso
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao iniciar o áudio: " + e.getMessage()); // Log de erro
-            } catch (Exception e) {
-                Log.e("AudioError", "Erro inesperado: " + e.getMessage()); // Log de erro
-            }
-            return false; // Indica falha
+            return playbackModule.playAudio(); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para pausar a reprodução de áudio.
-         *
-         * @return true se a reprodução foi pausada com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public boolean pauseAudio() throws RemoteException {
-            Log.d("MSGRECEIVED", "Pause audio"); // Log para depuração
-            try {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause(); // Pausa a reprodução
-                    return true; // Indica sucesso
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao pausar o áudio: " + e.getMessage()); // Log de erro
-            } catch (Exception e) {
-                Log.e("AudioError", "Erro inesperado: " + e.getMessage()); // Log de erro
-            }
-            return false; // Indica falha
+            return playbackModule.pauseAudio(); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para parar a reprodução de áudio.
-         *
-         * @return true se a reprodução foi parada com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public boolean stopAudio() throws RemoteException {
-            Log.d("MSGRECEIVED", "Stop audio"); // Log para depuração
-            try {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop(); // Para a reprodução
-                    mediaPlayer.prepare(); // Resets the MediaPlayer to a prepared state
-                    mediaPlayer.seekTo(0); // volta pro inicio da faixa
-                    return true; // Indica sucesso
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao parar o áudio: " + e.getMessage()); // Log de erro
-            } catch (Exception e) {
-                Log.e("AudioError", "Erro inesperado: " + e.getMessage()); // Log de erro
-            }
-            return false; // Indica falha
+            return playbackModule.stopAudio(); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para buscar uma posição específica na faixa de áudio.
-         *
-         * @param position Posição em milissegundos para buscar.
-         * @return true se a busca foi realizada com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public boolean seekAudio(int position) throws RemoteException {
-            Log.d("MSGRECEIVED", "Seek audio to position: " + position); // Log para depuração
-            try {
-                if (mediaPlayer != null) {
-                    mediaPlayer.seekTo(position); // Busca a posição
-                    return true; // Indica sucesso
-                } else {
-                    Log.w("MessageService", "MediaPlayer is null, cannot seek"); // Log de aviso
-                    return false; // Indica falha
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao buscar o áudio: " + e.getMessage()); // Log de erro
-                return false; // Indica falha
-            }
+            return playbackModule.seekAudio(position); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para obter a duração total da faixa de áudio.
-         *
-         * @return A duração total em milissegundos.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public int getDuration() throws RemoteException {
-            try {
-                if (mediaPlayer != null) {
-                    return mediaPlayer.getDuration(); // Obtém a duração
-                } else {
-                    Log.w("AudioService", "MediaPlayer is null, cannot get duration"); // Log de aviso
-                    return 0; // Retorna 0 se o MediaPlayer for nulo
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao obter a duração: " + e.getMessage()); // Log de erro
-                return 0; // Retorna 0 em caso de erro
-            }
+            return playbackModule.getDuration(); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para obter a posição atual da reprodução.
-         *
-         * @return A posição atual em milissegundos.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public int getCurrentPosition() throws RemoteException {
-            try {
-                if (mediaPlayer != null) {
-                    return mediaPlayer.getCurrentPosition(); // Obtém a posição atual
-                } else {
-                    Log.w("AudioService", "MediaPlayer is null, cannot get current position"); // Log de aviso
-                    return 0; // Retorna 0 se o MediaPlayer for nulo
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao obter a posição atual: " + e.getMessage()); // Log de erro
-                return 0; // Retorna 0 em caso de erro
-            }
+            return playbackModule.getCurrentPosition(); // Delega para o PlaybackModule
         }
 
-        /**
-         * Método para definir o volume da reprodução.
-         *
-         * @param volume Valor do volume (entre 0.0 e 1.0).
-         * @return true se o volume foi definido com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
-         */
         @Override
         public boolean setVolume(float volume) throws RemoteException {
-            try {
-                if (mediaPlayer != null) {
-                    mediaPlayer.setVolume(volume, volume); // Define o volume para os canais esquerdo e direito
-                    return true; // Indica sucesso
-                } else {
-                    Log.w("MessageService", "MediaPlayer is null, cannot set volume"); // Log de aviso
-                    return false; // Indica falha
-                }
-            } catch (IllegalStateException e) {
-                Log.e("AudioError", "Erro ao definir o volume: " + e.getMessage()); // Log de erro
-                return false; // Indica falha
-            }
+            return playbackModule.setVolume(volume); // Delega para o PlaybackModule
         }
-
     };
 
     /**
      * Método chamado quando o serviço é criado.
-     * Inicializa o MediaPlayer e o Equalizer.
+     * Inicializa os módulos.
      */
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate() chamado"); // Log para depuração
-        createNotificationChannel(); // Cria o canal de notificação
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.test_audio); // Audio para teste
-
-        // Inicializa o Equalizer
-        if (mediaPlayer != null) {
-            int audioSessionId = mediaPlayer.getAudioSessionId();
-            equalizer = new Equalizer(0, audioSessionId);
-            equalizer.setEnabled(true);
-        }
+        playbackModule = new PlaybackModule(this, R.raw.test_audio); // Inicializa o PlaybackModule
+        equalizationModule = new EqualizationModule(playbackModule.getMediaPlayer()); // Inicializa o EqualizationModule
+        notificationModule = new NotificationModule(this, CHANNEL_ID, NOTIFICATION_ID); // Inicializa o NotificationModule
+        notificationModule.createNotificationChannel(); // Cria o canal de notificação
 
     }
 
     /**
      * Método chamado quando um cliente se conecta ao serviço.
-     *
      * @param intent Intent utilizada para conectar ao serviço.
      * @return O Binder para comunicação com o serviço.
      */
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind() chamado, intent: " + intent); // Log para depuração
-        // Retorna o Binder para que os clientes possam interagir com o serviço
-        return binder;
+        return binder; // Retorna o Binder
     }
 
     /**
      * Método chamado quando o serviço é iniciado.
-     *
-     * @param intent Intent utilizada para iniciar o serviço.
-     * @param flags Flags adicionais.
-     * @param startId ID de início do serviço.
-     * @return Valor que indica como o sistema deve se comportar se o serviço for finalizado.
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        // Cria uma notificação
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.circle_users_adapter) // Substitua pelo seu ícone
-                .setContentTitle("Emixer App")
-                .setContentText("Ajustando áudio em segundo plano")
-                .setPriority(NotificationCompat.PRIORITY_LOW);
-
-        Notification notification = builder.build(); // Constrói a notificação
-        Log.d(TAG, "Notificação criada"); // Log para depuração
-
-        // Inicia o serviço de primeiro plano
-        startForeground(NOTIFICATION_ID, notification);
-
-        // START_STICKY é um tipo de Service que executa tarefas em segundo plano. Esses
-        // Services precisam continuar rodando em segundo plano mesmo que o usuário mude para
-        // outro aplicativo. Ao usar START_STICKY, nós garantimos que o serviço de áudio continue
-        // em execução mesmo que ele seja encerrado ou parado.
-        return START_STICKY;
+        Notification notification = notificationModule.createNotification("Emixer App", "Ajustando áudio em segundo plano"); // Cria a notificação
+        startForeground(NOTIFICATION_ID, notification); // Inicia o serviço em primeiro plano
+        return START_STICKY; // Retorna START_STICKY
     }
 
     /**
      * Método chamado quando o serviço é destruído.
-     * Libera os recursos do MediaPlayer e Equalizer.
+     * Libera os recursos dos módulos.
      */
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy() chamado"); // Log para depuração
 
-        // Libera os recursos do MediaPlayer e Equalizer
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-        if (equalizer != null) {
-            equalizer.release();
-            equalizer = null;
-        }
+        playbackModule.release(); // Libera os recursos do PlaybackModule
+        equalizationModule.release(); // Libera os recursos do EqualizationModule
     }
 
-    /**
-     * Cria o canal de notificação (necessário para Android 8.0+).
-     */
-    private void createNotificationChannel() {
-        // Cria um canal de notificação (necessário para Android 8.0+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Emixer Service Channel",
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-                Log.d(TAG, "Canal de notificação criado, ID: " + CHANNEL_ID); // Log para depuração
-            } else {
-                Log.e(TAG, "NotificationManager não disponível"); // Log de erro
-            }
-        }
+    // Implementação dos métodos da interface PlaybackInterface (delegação para PlaybackModule)
+    @Override
+    public boolean playAudio() {
+        return playbackModule.playAudio(); // Delega para o PlaybackModule
     }
 
+    @Override
+    public boolean pauseAudio() {
+        return playbackModule.pauseAudio(); // Delega para o PlaybackModule
+    }
 
+    @Override
+    public boolean stopAudio() {
+        return playbackModule.stopAudio(); // Delega para o PlaybackModule
+    }
+
+    @Override
+    public boolean seekAudio(int position) {
+        return playbackModule.seekAudio(position); // Delega para o PlaybackModule
+    }
+
+    @Override
+    public int getDuration() {
+        return playbackModule.getDuration(); // Delega para o PlaybackModule
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return playbackModule.getCurrentPosition(); // Delega para o PlaybackModule
+    }
+
+    @Override
+    public boolean setVolume(float volume) {
+        return playbackModule.setVolume(volume); // Delega para o PlaybackModule
+    }
 }
