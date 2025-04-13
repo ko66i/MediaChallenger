@@ -129,5 +129,22 @@ class AudioManager(private val aidlServiceManager: AidlServiceManager) {
         }
     }
 
+    fun setAudioResource(resourceName: String) {
+        if (aidlServiceManager.isServiceBound()) {
+            try {
+                val success = aidlServiceManager.getMessageService()?.setAudioResource(resourceName) ?: false
+                if (success) {
+                    Log.d("AudioManager", "Setting audio resource to $resourceName: Success")
+                } else {
+                    Log.w("AudioManager", "Setting audio resource to $resourceName: Failed")
+                }
+            } catch (e: android.os.RemoteException) {
+                Log.e("AudioManager", "RemoteException: ${e.message}")
+            }
+        } else {
+            Log.w("AudioManager", "Service not bound")
+        }
+    }
+
 
 }

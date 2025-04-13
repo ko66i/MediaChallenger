@@ -11,8 +11,10 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.content.Context;
 
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
 
 /**
  * Serviço para gerenciar a reprodução de áudio e a equalização.
@@ -40,7 +42,7 @@ public class AudioService extends Service {
         public boolean playAudio() throws RemoteException {
             Log.e("MSGRECEIVED", "Play audio"); // Log para depuração
             try {
-                if (!mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
                     // Inicializa o MediaPlayer
                     mediaPlayer.setLooping(true); // Define para repetir a música
                     mediaPlayer.start(); // Inicia a reprodução
@@ -64,7 +66,7 @@ public class AudioService extends Service {
         public boolean pauseAudio() throws RemoteException {
             Log.d("MSGRECEIVED", "Pause audio"); // Log para depuração
             try {
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.pause(); // Pausa a reprodução
                     return true; // Indica sucesso
                 }
@@ -86,7 +88,7 @@ public class AudioService extends Service {
         public boolean stopAudio() throws RemoteException {
             Log.d("MSGRECEIVED", "Stop audio"); // Log para depuração
             try {
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.stop(); // Para a reprodução
                     mediaPlayer.prepare(); // Resets the MediaPlayer to a prepared state
                     mediaPlayer.seekTo(0); // volta pro inicio da faixa
@@ -189,6 +191,51 @@ public class AudioService extends Service {
             }
         }
 
+        /**
+         * Método para definir qual recurso de áudio será reproduzido.
+         *
+         * @param resourceName Nome do recurso de áudio a ser reproduzido.
+         * @return true se o recurso foi definido com sucesso, false caso contrário.
+         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
+         */
+        @Override
+        public boolean setAudioResource(String resourceName) throws RemoteException {
+            Log.d("MSGRECEIVED", "Set audio resource: " + resourceName); // Log for debugging
+            try {
+                int audioResId;
+                if ("Música da lhama".equals(resourceName)) {
+                    audioResId = R.raw.test_audio; // Replace with the correct resource ID
+                } else if ("Música do esqueleto".equals(resourceName)) {
+                    audioResId = R.raw.skull_music; // Replace with the correct resource ID
+                } else {
+                    audioResId = R.raw.test_audio; // Default resource
+                }
+
+                // Stop and release the previous MediaPlayer
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+
+                // Create a new MediaPlayer with the selected resource
+                mediaPlayer = MediaPlayer.create(AudioService.this, audioResId);
+
+                // Prepare the MediaPlayer
+                if (mediaPlayer != null) {
+                    mediaPlayer.setLooping(true); // Set looping
+                }
+
+                return true; // Indicate success
+
+            } catch (Exception e) {
+                Log.e("AudioError", "Error setting audio resource: " + e.getMessage()); // Log error
+                return false; // Indicate failure
+            }
+        }
+
     };
 
     /**
@@ -202,13 +249,14 @@ public class AudioService extends Service {
         createNotificationChannel(); // Cria o canal de notificação
 
         // Obtenha a música selecionada do singleton
-        String selectedMusic = String.valueOf(SelectedMusicSingleton.INSTANCE.getSelectedMusic());
+        LiveData<String> selectedMusicLiveData = SelectedMusicSingleton.INSTANCE.getSelectedMusic();
+        String selectedMusic = selectedMusicLiveData.getValue();
 
         // Determine qual recurso de áudio usar com base na música selecionada
         int audioResId;
-        if ("música da lhama".equals(selectedMusic)) {
+        if ("Música da lhama".equals(selectedMusic)) {
             audioResId = R.raw.test_audio; // Substitua pelo ID de recurso correto
-        } else if ("música do esqueleto".equals(selectedMusic)) {
+        } else if ("Música do esqueleto".equals(selectedMusic)) {
             audioResId = R.raw.skull_music; // Substitua pelo ID de recurso correto
         } else {
             audioResId = R.raw.test_audio; // Recurso padrão

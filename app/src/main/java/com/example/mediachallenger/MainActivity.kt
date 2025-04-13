@@ -1,5 +1,7 @@
 package com.example.mediachallenger
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.os.*
 import android.util.Log
 import android.widget.SeekBar
@@ -19,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     private val AUDIO_PERMISSION_REQUEST = 100 // Código para a requisição de permissão de áudio
     private lateinit var permissionManager: PermissionManager // Objeto para gerenciar as permissões do aplicativo
     private lateinit var aidlServiceManager: AidlServiceManager // Objeto para gerenciar a conexão com o serviço AIDL
-    private lateinit var audioManager: AudioManager // Objeto para interagir com as funcionalidades de áudio do serviço
+    lateinit var audioManager: AudioManager // Objeto para interagir com as funcionalidades de áudio do serviço
     private lateinit var audioSettingsManager: AudioSettingsManager // Objeto para gerenciar as configurações dos botões de controle de áudio
     val trackListBottomSheetDialog = BottomSheetTrackList()
     /**
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater) // Infla o layout da Activity
+        supportActionBar?.hide()
         setContentView(binding.root) // Define o layout inflado como o layout da Activity
 
         aidlServiceManager = AidlServiceManager(this) // Inicializa o gerenciador de serviço AIDL
@@ -77,11 +80,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            override fun onStartTrackingTouch(seekbar: SeekBar?) {
                 // Opcional: Implementar se precisar fazer algo quando o usuário começa a tocar na SeekBar
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            override fun onStopTrackingTouch(seekbar: SeekBar?) {
                 // Opcional: Implementar se precisar fazer algo quando o usuário para de tocar na SeekBar
             }
         })
@@ -100,11 +103,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            override fun onStartTrackingTouch(seekbar: SeekBar?) {
                 // Opcional: Implementar se precisar fazer algo quando o usuário começa a tocar na SeekBar
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            override fun onStopTrackingTouch(seekbar: SeekBar?) {
                 // Opcional: Implementar se precisar fazer algo quando o usuário para de tocar na SeekBar
             }
         })
@@ -132,6 +135,7 @@ class MainActivity : AppCompatActivity() {
      * Vincula ao serviço AIDL e configura as definições de áudio.
      * Define os callbacks para quando o serviço é conectado e desconectado.
      */
+
     private fun bindAidlService() {
         aidlServiceManager.bindService(
             onServiceConnected = { service ->
@@ -139,6 +143,9 @@ class MainActivity : AppCompatActivity() {
 
                 // Inicializa o AudioManager
                 audioManager = AudioManager(aidlServiceManager)
+
+                // Set the initial audio resource
+                audioManager.setAudioResource(SelectedMusicSingleton.selectedMusic.value ?: "Música da lhama")
 
                 // Obtém a duração da música do serviço
                 val duration = audioManager.getDuration()
@@ -152,13 +159,13 @@ class MainActivity : AppCompatActivity() {
                 // Inicializa o AudioSettingsManager quando o serviço é conectado
                 audioSettingsManager = AudioSettingsManager(
                     playAudio = {  -> audioManager.playAudio() }, // Callback para tocar audio
-                    pauseAudio = {  ->
+                    stopAudio = {  ->
+                        audioManager.pauseAudio()  // Callback para parar audio
+                        },
+                    pauseAudio = { ->
                         audioManager.stopAudio()  // Callback para pausar audio
                         binding.seekBar.progress = 0 // Reset the SeekBar to the beginning
-                         },
-                    stopAudio = {  ->
-                        audioManager.pauseAudio() }, // Callback para parar audio
-
+                    }
                 )
 
                 // Configura os listeners para os botões de controle de áudio (play, pause, stop)
@@ -171,6 +178,9 @@ class MainActivity : AppCompatActivity() {
 
                 // Inicia a atualização da SeekBar de progresso da música
                 handler.post(updateSeekBar)
+
+                // **Explicitly call updateAnimation after audioManager is initialized**
+                updateAnimation(SelectedMusicSingleton.selectedMusic.value)
             },
             onServiceDisconnected = {
                 // Callback chamado quando o serviço é desconectado
@@ -179,6 +189,7 @@ class MainActivity : AppCompatActivity() {
             }
         )
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -193,18 +204,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateAnimation(selectedMusic: String?) {
         Log.e("BTS", "IS CALLING: ${selectedMusic}" )
-        // Selecione a animação com base na música selecionada
-        when (selectedMusic) {
-            "música da lhama" -> {
-                binding.animationView.setAnimation(R.raw.dancing) // Substitua com a animação correta
-            }
-            "música do esqueleto" -> {
-                binding.animationView.setAnimation(R.raw.skull) // Substitua com a animação correta
-            }
-            else -> {
-                binding.animationView.setAnimation(R.raw.dancing) // Animação padrão, se necessário
+        // Select the animation based on the music selected
+        if (::audioManager.isInitialized) {
+            when (selectedMusic) {
+                "Música da lhama" -> {
+                    binding.animationView.setAnimation(R.raw.dancing)
+                    audioManager.setAudioResource("Música da lhama")  // Set the lhama music
+                    //audioManager.playAudio()
+                }
+
+                "Música do esqueleto" -> {
+                    binding.animationView.setAnimation(R.raw.skull)
+                    audioManager.setAudioResource("Música do esqueleto") // Set the esqueleto music
+                    //audioManager.playAudio()
+                }
+
+                else -> {
+                    binding.animationView.setAnimation(R.raw.dancing)
+                    audioManager.setAudioResource("Música da lhama") // Set the default music
+                    //audioManager.playAudio()
+                }
             }
         }
+        binding.animationView.playAnimation()
     }
 
 }
