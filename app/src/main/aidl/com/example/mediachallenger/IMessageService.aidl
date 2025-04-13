@@ -11,5 +11,7 @@ interface IMessageService {
        int getDuration();
        int getCurrentPosition();
        boolean setVolume(float volume);
+       boolean setAudioResource(String resourceName); 
+
 
 }
