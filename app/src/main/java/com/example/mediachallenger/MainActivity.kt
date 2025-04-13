@@ -126,7 +126,6 @@ class MainActivity : AppCompatActivity() {
 
         // Observe o LiveData para mudanças
         SelectedMusicSingleton.selectedMusic.observe(this, Observer { selectedMusic ->
-            Log.e("BST", "is calling: $selectedMusic")
             updateAnimation(selectedMusic)
         })
     }
@@ -226,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        binding.animationView.playAnimation()
+        // binding.animationView.playAnimation()
     }
 
 }
