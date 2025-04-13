@@ -9,11 +9,11 @@
 
 ## Objetivo do Projeto
 
-Este projeto implementa os métodos do ciclo de vida de um serviço de áudio no Android, criando um serviço de reprodução de áudio com capacidades de equalização. O objetivo é desenvolver um serviço que lide com a reprodução de áudio (formato MP3) e forneça recursos básicos de equalização.
+Este projeto implementa os métodos do ciclo de vida de um serviço de áudio no Android, criando um serviço de reprodução de áudio com capacidades de equalização. O objetivo é desenvolver um serviço que lide com a reprodução de áudio (formato MP3), forneça recursos básicos de equalização, **e permita a troca dinâmica entre diferentes faixas de áudio.**
 
 ## Descrição do Projeto
 
-Esta aplicação Android fornece um serviço de reprodução de áudio que permite aos usuários reproduzir, pausar e parar arquivos de áudio MP3. Também inclui um recurso básico de equalização para ajustar as frequências de áudio. A aplicação utiliza um `AudioService` para gerenciar a reprodução de áudio em segundo plano e utiliza o `MediaPlayer` para o controle do áudio. A comunicação entre a Activity e o Serviço é feita utilizando AIDL (Android Interface Definition Language).
+Esta aplicação Android fornece um serviço de reprodução de áudio que permite aos usuários reproduzir, pausar e parar arquivos de áudio MP3. Também inclui um recurso básico de equalização para ajustar as frequências de áudio. A aplicação utiliza um `AudioService` para gerenciar a reprodução de áudio em segundo plano e utiliza o `MediaPlayer` para o controle do áudio. A comunicação entre a Activity e o Serviço é feita utilizando AIDL (Android Interface Definition Language). **Agora, os usuários podem selecionar diferentes faixas de áudio para reprodução, alterando dinamicamente a música que está sendo tocada.**
 
 ## Visão Geral da Interface
 
@@ -33,23 +33,27 @@ Aqui está uma captura de tela da interface principal da aplicação:
 *   **Comunicação AIDL:** Utiliza AIDL para comunicar entre a Activity e o Serviço.
 *   **Seek Bar:** Permite avançar ou retroceder na faixa de áudio.
 *   **Controle de Volume:** Permite ajustar o volume da reprodução.
+*   **Troca de Faixa Dinâmica:** **Permite aos usuários selecionar diferentes faixas de áudio de uma lista, alterando a música em tempo real.**
 
 ## Arquitetura
 
 A aplicação segue uma arquitetura modular:
 
 *   **`AidlServiceManager`:** Gerencia a vinculação e desvinculação do serviço AIDL.
-*   **`AudioManager`:** Fornece métodos para controlar a reprodução de áudio (reproduzir, pausar, parar, buscar, definir volume) através do serviço AIDL.
+*   **`AudioManager`:** Fornece métodos para controlar a reprodução de áudio (reproduzir, pausar, parar, buscar, definir volume, **trocar de faixa**) através do serviço AIDL.
 *   **`AudioSettingsManager`:** Configura os listeners para os botões da interface do usuário (reproduzir, pausar, parar) e gerencia as animações correspondentes.
-*   **`AudioService`:** Um serviço que estende `android.app.Service` e implementa a interface AIDL `IMessageService`. Ele lida com a reprodução de áudio utilizando `MediaPlayer` e inclui equalização básica.
-*   **`MainActivity`:** A activity principal que se vincula ao `AudioService` e fornece a interface do usuário para controlar a reprodução de áudio.
+*   **`AudioService`:** Um serviço que estende `android.app.Service` e implementa a interface AIDL `IMessageService`. Ele lida com a reprodução de áudio utilizando `MediaPlayer` e inclui equalização básica. **Agora também suporta a troca dinâmica de faixas de áudio.**
+*   **`MainActivity`:** A activity principal que se vincula ao `AudioService` e fornece a interface do usuário para controlar a reprodução de áudio. **Inclui a lógica para exibir uma lista de faixas e permitir que o usuário selecione uma nova faixa.**
 *   **`PermissionManager`:** Gerencia as permissões de tempo de execução para gravação de áudio e acesso à mídia.
+*   **`BottomSheetTrackList`**: Mostra uma lista de músicas disponiveis
+*   **`SelectedMusicSingleton`**: Salva a música seleciona.
 
 ## Módulos
 
 1.  **Módulo de Reprodução:**
     *   Responsável por reproduzir, pausar e parar arquivos de áudio utilizando `MediaPlayer`.
     *   Localizado dentro do `AudioService`.
+    *   **Atualizado para suportar a troca dinâmica de faixas.**
 2.  **Módulo de Equalização (Parcial):**
     *   Inclui a inicialização da classe `Equalizer`, mas carece de implementação completa.
     *   Localizado dentro do `AudioService`.
@@ -99,7 +103,7 @@ A aplicação segue uma arquitetura modular:
     *   Fornece métodos para verificar se o serviço está vinculado e para obter a interface `IMessageService`.
 
 *   **`AudioManager.kt`:**
-    *   Fornece métodos (`playAudio`, `pauseAudio`, `stopAudio`, `seekAudio`, `getDuration`, `getCurrentPosition`, `setVolume`) para controlar a reprodução de áudio, chamando os métodos correspondentes na interface `IMessageService`.
+    *   Fornece métodos (`playAudio`, `pauseAudio`, `stopAudio`, `seekAudio`, `getDuration`, `getCurrentPosition`, `setVolume`, **`setAudioResource`**) para controlar a reprodução de áudio, chamando os métodos correspondentes na interface `IMessageService`.
     *   Registra mensagens de sucesso ou falha com base no resultado das chamadas AIDL.
 
 *   **`AudioSettingsManager.kt`:**
@@ -112,11 +116,12 @@ A aplicação segue uma arquitetura modular:
     *   Vincula-se ao `AudioService` quando a activity é criada.
     *   Solicita permissões de áudio utilizando o `PermissionManager`.
     *   Implementa a lógica para as SeekBars de progresso e volume.
+    *   **Implementa a lógica para exibir uma lista de faixas e permitir que o usuário selecione uma nova faixa.**
 
 *   **`AudioService.java`:**
     *   Um serviço que estende `android.app.Service` e implementa a interface AIDL `IMessageService`.
-    *   Lida com a reprodução de áudio utilizando `MediaPlayer`.
-    *   Inclui equalização básica utilizando `Equalizer`.
+    *   Lida com a reprodução de áudio utilizando `MediaPlayer` e inclui equalização básica.
+    *   **Agora suporta a troca dinâmica de faixas de áudio através do método `setAudioResource`.**
     *   Cria uma notificação persistente com controles de reprodução.
 
 *   **`PermissionManager.kt`:**
@@ -125,7 +130,7 @@ A aplicação segue uma arquitetura modular:
 
 *   **`IMessageService.aidl`:**
     *   Define a interface para o `AudioService`, permitindo que a Activity chame métodos no Serviço.
-    *   Inclui métodos para `playAudio`, `pauseAudio` e `stopAudio`, `seekAudio`, `getDuration`, `getCurrentPosition`, `setVolume`.
+    *   Inclui métodos para `playAudio`, `pauseAudio` e `stopAudio`, `seekAudio`, `getDuration`, `getCurrentPosition`, `setVolume`, **e `setAudioResource`**.
 
 *   **`AndroidManifest.xml`:**
     *   Declara as permissões necessárias, o serviço e a activity.
@@ -140,6 +145,7 @@ A aplicação segue uma arquitetura modular:
     *   Utilize os botões de reproduzir, pausar e parar na interface do usuário para controlar a reprodução de áudio.
     *   Utilize a SeekBar para controlar o ponto da musica.
     *   Utilize a SeekBar de volume para controlar o volume da musica.
+    *   **Selecione uma nova faixa de áudio na lista para alterar a música que está sendo tocada.**
 
 2.  **Interagindo com a Notificação:**
     *   Quando o áudio estiver sendo reproduzido, uma notificação persistente será exibida na barra de status.
