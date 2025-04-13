@@ -151,4 +151,11 @@ A aplicação segue uma arquitetura modular:
     *   Concluir a implementação do equalizador de 5 bandas utilizando `AudioTrack` e `Equalizer`.
     *   Permitir que os usuários ajustem as bandas de frequência na interface do usuário.
 *   **Adicionar Seleção de Arquivo de Áudio:**
-    *   Implementar um seletor de arquivos para permitir que os usuários
+    *   Implementar um seletor de arquivos para permitir que os usuários escolham arquivos de áudio de seus dispositivos.
+*   **Melhorar a Interface do Usuário:**
+    *   Adicionar mais opções de customização e melhorar o design geral da interface.
+*   **Controles na Notificação:**
+    *   Adicionar botões de controle (play/pause/stop) à notificação usando `MediaStyle` para uma melhor experiência do usuário.
+*   **Controle remoto via `MediaSession`:**
+    *   Permitir controlar a reprodução de áudio através de dispositivos externos, como fones de ouvido Bluetooth.
+
