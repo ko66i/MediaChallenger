@@ -51,8 +51,8 @@ class AidlServiceManager(private val context: Context) {
         }
 
         // Cria uma Intent com a ação correta para iniciar o serviço
-        val intent = Intent(context, MessageService::class.java)
-        intent.action = MessageService.ACTION_FOREGROUND_SERVICE // Define a ação para o serviço de primeiro plano
+        val intent = Intent(context, AudioService::class.java)
+        intent.action = AudioService.ACTION_FOREGROUND_SERVICE // Define a ação para o serviço de primeiro plano
 
         try {
             // Vincula ao serviço usando a Intent e a ServiceConnection

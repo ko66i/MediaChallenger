@@ -1,4 +1,3 @@
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,17 +6,55 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/trackPositionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekBar"
+        android:layout_marginStart="16dp"
+        android:text="Track Position"
+        android:textColor="@android:color/white" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/volumeLabel"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="Track Position: Use this slider to adjust the current position in the audio track." />
+
+    <TextView
+        android:id="@+id/volumeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/volumeSeekBar"
+        android:layout_marginStart="16dp"
+        android:text="Volume"
+        android:textColor="@android:color/white" />
+
+    <SeekBar
+        android:id="@+id/volumeSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/rlt_media_buttons"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:max="100"
+        android:contentDescription="Volume: Use this slider to adjust the volume of the audio." />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:lottie_rawRes="@raw/dancing"
+        android:layout_above="@+id/trackPositionLabel"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
         app:lottie_autoPlay="false"
         app:lottie_loop="true"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        />
+        app:lottie_rawRes="@raw/dancing" />
 
     <RelativeLayout
         android:id="@+id/rlt_media_buttons"
@@ -35,11 +72,10 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="0dp"
             android:background="@drawable/pause_icon"
+            android:backgroundTint="@color/purple_200"
             android:textColor="@color/black"
             android:textSize="30sp"
-            tools:ignore="RelativeOverlap"
-            android:backgroundTint="@color/purple_200"
-            />
+            tools:ignore="RelativeOverlap" />
 
         <Button
             android:id="@+id/btnPlay"
@@ -50,11 +86,10 @@
             android:layout_marginStart="0dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/play"
+            android:backgroundTint="@color/teal_200"
             android:textColor="@color/black"
             android:textSize="30sp"
-            tools:ignore="RelativeOverlap"
-            android:backgroundTint="@color/teal_200"
-            />
+            tools:ignore="RelativeOverlap" />
 
         <Button
             android:id="@+id/btnStop"
@@ -65,11 +100,10 @@
             android:layout_marginStart="0dp"
             android:layout_marginEnd="30dp"
             android:background="@drawable/stop"
+            android:backgroundTint="@color/purple_500"
             android:textColor="@color/black"
             android:textSize="30sp"
-            tools:ignore="RelativeOverlap"
-            android:backgroundTint="@color/purple_500"
-            />
+            tools:ignore="RelativeOverlap" />
 
     </RelativeLayout>
 
