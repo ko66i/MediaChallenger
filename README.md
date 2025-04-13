@@ -19,10 +19,8 @@ Esta aplicação Android fornece um serviço de reprodução de áudio que permi
 
  Aqui está uma captura de tela da interface principal da aplicação:
 
- ![Screenshot da Aplicação](https://i.imgur.com/your_image_id.png)
-
 <div style="display: flex; flex-direction: 'row'; align-items: 'center';">
-	<img src="images/app-emixador" width="325px">	
+	<img src="images/app-emixador.jpg" width="325px">	
 </div>
 
 ## Principais Funcionalidades
