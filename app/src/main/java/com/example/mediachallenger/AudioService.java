@@ -201,7 +201,20 @@ public class AudioService extends Service {
         Log.d(TAG, "onCreate() chamado"); // Log para depuração
         createNotificationChannel(); // Cria o canal de notificação
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.test_audio); // Audio para teste
+        // Obtenha a música selecionada do singleton
+        String selectedMusic = String.valueOf(SelectedMusicSingleton.INSTANCE.getSelectedMusic());
+
+        // Determine qual recurso de áudio usar com base na música selecionada
+        int audioResId;
+        if ("música da lhama".equals(selectedMusic)) {
+            audioResId = R.raw.test_audio; // Substitua pelo ID de recurso correto
+        } else if ("música do esqueleto".equals(selectedMusic)) {
+            audioResId = R.raw.skull_music; // Substitua pelo ID de recurso correto
+        } else {
+            audioResId = R.raw.test_audio; // Recurso padrão
+        }
+
+        mediaPlayer = MediaPlayer.create(this, audioResId); // Audio para teste
 
         // Inicializa o Equalizer
         if (mediaPlayer != null) {

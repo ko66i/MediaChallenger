@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.emixerapp.manager.PermissionManager
 import com.example.mediachallenger.databinding.ActivityMainBinding
 import android.os.RemoteException
+import androidx.lifecycle.Observer
+import com.airbnb.lottie.LottieAnimationView
 
 /**
  * Activity principal da aplicação, responsável por controlar a interface do usuário
@@ -19,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var aidlServiceManager: AidlServiceManager // Objeto para gerenciar a conexão com o serviço AIDL
     private lateinit var audioManager: AudioManager // Objeto para interagir com as funcionalidades de áudio do serviço
     private lateinit var audioSettingsManager: AudioSettingsManager // Objeto para gerenciar as configurações dos botões de controle de áudio
-
+    val trackListBottomSheetDialog = BottomSheetTrackList()
     /**
      * Handler e Runnable para atualizar a SeekBar de progresso da música.
      * Utiliza um Handler para postar a atualização na thread principal, garantindo
@@ -113,6 +115,17 @@ class MainActivity : AppCompatActivity() {
         // Vincula ao serviço AIDL e configura as definições de áudio
         bindAidlService()
 
+        binding.btnList.setOnClickListener {
+            if (!trackListBottomSheetDialog.isVisible) {
+                trackListBottomSheetDialog.show(supportFragmentManager, "BSLIST")
+            }
+        }
+
+        // Observe o LiveData para mudanças
+        SelectedMusicSingleton.selectedMusic.observe(this, Observer { selectedMusic ->
+            Log.e("BST", "is calling: $selectedMusic")
+            updateAnimation(selectedMusic)
+        })
     }
 
     /**
@@ -167,11 +180,31 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     /**
      * Verifica e solicita as permissões de áudio necessárias.
      */
     private fun checkAudioPermissions() {
         permissionManager.checkAudioPermissions(AUDIO_PERMISSION_REQUEST)
+    }
+
+    private fun updateAnimation(selectedMusic: String?) {
+        Log.e("BTS", "IS CALLING: ${selectedMusic}" )
+        // Selecione a animação com base na música selecionada
+        when (selectedMusic) {
+            "música da lhama" -> {
+                binding.animationView.setAnimation(R.raw.dancing) // Substitua com a animação correta
+            }
+            "música do esqueleto" -> {
+                binding.animationView.setAnimation(R.raw.skull) // Substitua com a animação correta
+            }
+            else -> {
+                binding.animationView.setAnimation(R.raw.dancing) // Animação padrão, se necessário
+            }
+        }
     }
 
 }

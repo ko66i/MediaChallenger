@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">MediaChallenger</string>
     <string name="message_service_description">Allow access to the Message Service.</string>
+    <string name="escolha_uma_faixa">Escolha uma faixa</string>
 </resources>
