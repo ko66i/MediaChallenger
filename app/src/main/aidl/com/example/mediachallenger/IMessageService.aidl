@@ -7,4 +7,9 @@ interface IMessageService {
        boolean playAudio();
        boolean pauseAudio();
        boolean stopAudio();
+       boolean seekAudio(int position);
+       int getDuration();
+       int getCurrentPosition();
+       boolean setVolume(float volume);
+
 }

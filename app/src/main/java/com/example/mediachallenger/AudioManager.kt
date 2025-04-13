@@ -67,4 +67,67 @@ class AudioManager(private val aidlServiceManager: AidlServiceManager) {
             Log.w("AudioManager", "Service not bound") // Serviço não vinculado
         }
     }
+    fun seekAudio(position: Int) {
+        if (aidlServiceManager.isServiceBound()) {
+            try {
+                val success = aidlServiceManager.getMessageService()?.seekAudio(position) ?: false
+                if (success) {
+                    Log.d("AudioManager", "Setting seek audio to position $position: Success")
+                } else {
+                    Log.w("AudioManager", "Setting seek audio to position $position: Failed")
+                }
+            } catch (e: android.os.RemoteException) {
+                Log.e("AudioManager", "RemoteException: ${e.message}")
+            }
+        } else {
+            Log.w("AudioManager", "Service not bound")
+        }
+    }
+
+    fun getDuration(): Int {
+        if (aidlServiceManager.isServiceBound()) {
+            try {
+                return aidlServiceManager.getMessageService()?.duration ?: 0
+            } catch (e: android.os.RemoteException) {
+                Log.e("AudioManager", "RemoteException: ${e.message}")
+                return 0
+            }
+        } else {
+            Log.w("AudioManager", "Service not bound")
+            return 0
+        }
+    }
+
+    fun getCurrentPosition(): Int {
+        if (aidlServiceManager.isServiceBound()) {
+            try {
+                return aidlServiceManager.getMessageService()?.currentPosition ?: 0
+            } catch (e: android.os.RemoteException) {
+                Log.e("AudioManager", "RemoteException: ${e.message}")
+                return 0
+            }
+        } else {
+            Log.w("AudioManager", "Service not bound")
+            return 0
+        }
+    }
+
+    fun setVolume(volume: Float) {
+        if (aidlServiceManager.isServiceBound()) {
+            try {
+                val success = aidlServiceManager.getMessageService()?.setVolume(volume) ?: false
+                if (success) {
+                    Log.d("AudioManager", "Setting volume to $volume: Success")
+                } else {
+                    Log.w("AudioManager", "Setting volume to $volume: Failed")
+                }
+            } catch (e: android.os.RemoteException) {
+                Log.e("AudioManager", "RemoteException: ${e.message}")
+            }
+        } else {
+            Log.w("AudioManager", "Service not bound")
+        }
+    }
+
+
 }
