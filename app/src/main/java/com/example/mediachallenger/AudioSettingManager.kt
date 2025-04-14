@@ -26,8 +26,8 @@ class AudioSettingsManager(
      */
     fun setupClickListeners(
         btnPlay: Button,
-        btnStop: Button,
         btnPause: Button,
+        btnStop: Button,
         animationView: LottieAnimationView
     ) {
 

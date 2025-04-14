@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var audioManager: AudioManager // Objeto para interagir com as funcionalidades de áudio do serviço
     private lateinit var audioSettingsManager: AudioSettingsManager // Objeto para gerenciar as configurações dos botões de controle de áudio
     val trackListBottomSheetDialog = BottomSheetTrackList()
+
     /**
      * Handler e Runnable para atualizar a SeekBar de progresso da música.
      * Utiliza um Handler para postar a atualização na thread principal, garantindo
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             if (aidlServiceManager.isServiceBound()) {
                 try {
                     // Obtém a posição atual da música do serviço
-                    val currentPosition = audioManager.getCurrentPosition()
+                    val currentPosition = aidlServiceManager.getMessageService()?.currentPosition ?: 0
                     // Atualiza a SeekBar com a posição atual
                     binding.seekBar.progress = currentPosition
                 } catch (e: RemoteException) {
@@ -76,7 +77,11 @@ class MainActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // Verifica se a alteração na SeekBar foi feita pelo usuário
                 if (fromUser) {
-                    audioManager.seekAudio(progress) // Chama o método seekAudio no AudioManager para notificar o serviço
+                    try {
+                        aidlServiceManager.getMessageService()?.seekAudio(progress)
+                    } catch (e: RemoteException) {
+                        Log.e("MainActivity", "RemoteException: ${e.message}")
+                    }
                 }
             }
 
@@ -99,7 +104,11 @@ class MainActivity : AppCompatActivity() {
                 if (fromUser) {
                     // Calcula o volume com base no progresso da SeekBar (0.0 a 1.0)
                     val volume = progress / 100f
-                    audioManager.setVolume(volume) // Chama o método setVolume no AudioManager para notificar o serviço
+                    try {
+                        aidlServiceManager.getMessageService()?.setVolume(volume)
+                    } catch (e: RemoteException) {
+                        Log.e("MainActivity", "RemoteException: ${e.message}")
+                    }
                 }
             }
 
@@ -144,26 +153,52 @@ class MainActivity : AppCompatActivity() {
                 audioManager = AudioManager(aidlServiceManager)
 
                 // Set the initial audio resource
-                audioManager.setAudioResource(SelectedMusicSingleton.selectedMusic.value ?: "Música da lhama")
+                try {
+                    audioManager.setAudioResource(SelectedMusicSingleton.selectedMusic.value ?: "Música da lhama")
+                } catch (e: RemoteException) {
+                    Log.e("MainActivity", "RemoteException: ${e.message}")
+                }
 
                 // Obtém a duração da música do serviço
-                val duration = audioManager.getDuration()
+                val duration = try {
+                    service.duration
+                } catch (e: RemoteException) {
+                    0
+                }
                 binding.seekBar.max = duration // Define o valor máximo da SeekBar com a duração da música
 
                 // Define um valor de volume inicial para a SeekBar e para o serviço
                 val initialVolume = 50 // Ajustar conforme necessário
                 binding.volumeSeekBar.progress = initialVolume
-                audioManager.setVolume(initialVolume / 100f) // Define o volume no serviço
+                try {
+                    service.setVolume(initialVolume / 100f) // Define o volume no serviço
+                } catch (e: RemoteException) {
+                    Log.e("MainActivity", "RemoteException: ${e.message}")
+                }
 
                 // Inicializa o AudioSettingsManager quando o serviço é conectado
                 audioSettingsManager = AudioSettingsManager(
-                    playAudio = {  -> audioManager.playAudio() }, // Callback para tocar audio
-                    stopAudio = {  ->
-                        audioManager.pauseAudio()  // Callback para parar audio
-                        },
-                    pauseAudio = { ->
-                        audioManager.stopAudio()  // Callback para pausar audio
-                        binding.seekBar.progress = 0 // Reset the SeekBar to the beginning
+                    playAudio = {
+                        try {
+                            service.playAudio()
+                        } catch (e: RemoteException) {
+                            Log.e("MainActivity", "RemoteException: ${e.message}")
+                        }
+                    },
+                    pauseAudio = {
+                        try {
+                            service.pauseAudio()
+                        } catch (e: RemoteException) {
+                            Log.e("MainActivity", "RemoteException: ${e.message}")
+                        }
+                    },
+                    stopAudio = {
+                        try {
+                            service.stopAudio()
+                            binding.seekBar.progress = 0
+                        } catch (e: RemoteException) {
+                            Log.e("MainActivity", "RemoteException: ${e.message}")
+                        }
                     }
                 )
 
@@ -205,24 +240,30 @@ class MainActivity : AppCompatActivity() {
         Log.e("BTS", "IS CALLING: ${selectedMusic}" )
         // Select the animation based on the music selected
         if (::audioManager.isInitialized) {
-            when (selectedMusic) {
-                "Música da lhama" -> {
-                    binding.animationView.setAnimation(R.raw.dancing)
-                    audioManager.setAudioResource("Música da lhama")  // Set the lhama music
-                    //audioManager.playAudio()
-                }
+            try {
+                aidlServiceManager.getMessageService()?.let { service ->
+                    when (selectedMusic) {
+                        "Música da lhama" -> {
+                            binding.animationView.setAnimation(R.raw.dancing)
+                            audioManager.setAudioResource("Música da lhama")  // Set the lhama music
+                            //audioManager.playAudio()
+                        }
 
-                "Música do esqueleto" -> {
-                    binding.animationView.setAnimation(R.raw.skull)
-                    audioManager.setAudioResource("Música do esqueleto") // Set the esqueleto music
-                    //audioManager.playAudio()
-                }
+                        "Música do esqueleto" -> {
+                            binding.animationView.setAnimation(R.raw.skull)
+                            audioManager.setAudioResource("Música do esqueleto") // Set the esqueleto music
+                            //audioManager.playAudio()
+                        }
 
-                else -> {
-                    binding.animationView.setAnimation(R.raw.dancing)
-                    audioManager.setAudioResource("Música da lhama") // Set the default music
-                    //audioManager.playAudio()
+                        else -> {
+                            binding.animationView.setAnimation(R.raw.dancing)
+                            audioManager.setAudioResource("Música da lhama") // Set the default music
+                            //audioManager.playAudio()
+                        }
+                    }
                 }
+            } catch (e: RemoteException) {
+                Log.e("MainActivity", "RemoteException: ${e.message}")
             }
         }
         // binding.animationView.playAnimation()
