@@ -43,7 +43,7 @@ Aqui está uma captura de tela da interface principal da aplicação:
 A aplicação segue uma arquitetura modular:
 
 *   **`AidlServiceManager`:** Gerencia a vinculação e desvinculação do serviço AIDL.
-*   **`AudioManager`:** Fornece métodos para controlar a reprodução de áudio (reproduzir, pausar, parar, buscar, definir volume, **trocar de faixa**) através do serviço AIDL.
+*   **`AudioManager`:** Gerencia a configuração de áudio, como a troca de faixas, comunicando-se com o serviço AIDL.
 *   **`AudioSettingsManager`:** Configura os listeners para os botões da interface do usuário (reproduzir, pausar, parar) e gerencia as animações correspondentes.
 *   **`AudioService`:** Um serviço que estende `android.app.Service` e implementa a interface AIDL `IMessageService`. Ele lida com a reprodução de áudio utilizando `MediaPlayer` e inclui equalização básica. **Agora também suporta a troca dinâmica de faixas de áudio.**
 *   **`MainActivity`:** A activity principal que se vincula ao `AudioService` e fornece a interface do usuário para controlar a reprodução de áudio. **Inclui a lógica para exibir uma lista de faixas e permitir que o usuário selecione uma nova faixa.**
@@ -106,12 +106,12 @@ A aplicação segue uma arquitetura modular:
     *   Fornece métodos para verificar se o serviço está vinculado e para obter a interface `IMessageService`.
 
 *   **`AudioManager.kt`:**
-    *   Fornece métodos (`playAudio`, `pauseAudio`, `stopAudio`, `seekAudio`, `getDuration`, `getCurrentPosition`, `setVolume`, **`setAudioResource`**) para controlar a reprodução de áudio, chamando os métodos correspondentes na interface `IMessageService`.
+    *   Gerencia a configuração de áudio, como a troca de faixas, comunicando-se com o serviço AIDL.
     *   Registra mensagens de sucesso ou falha com base no resultado das chamadas AIDL.
 
 *   **`AudioSettingsManager.kt`:**
     *   Configura os listeners de clique para os botões da interface do usuário (reproduzir, pausar, parar).
-    *   Chama os métodos de controle de áudio correspondentes (`playAudio`, `pauseAudio`, `stopAudio`) do `AudioManager` quando os botões são clicados.
+    *   Chama os métodos de controle de áudio correspondentes (`playAudio`, `pauseAudio`, `stopAudio`) do `PlaybackModule` quando os botões são clicados.
     *   Gerencia a animação Lottie com base no estado da reprodução.
 
 *   **`MainActivity.kt`:**
