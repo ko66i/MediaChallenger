@@ -23,7 +23,7 @@ Aqui está uma captura de tela da interface principal da aplicação:
     <img src="images/app1.png" width="325px">
 </div>
 <div style="display: flex; flex-direction: 'row'; align-items: 'center';">
-    <img src="images/app2.png" width="325px">
+    <img src="appcomplete.png" width="325px">
 </div>
 
 ## Principais Funcionalidades
