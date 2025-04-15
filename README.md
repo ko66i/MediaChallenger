@@ -20,10 +20,7 @@ Esta aplicação Android fornece um serviço de reprodução de áudio que permi
 Aqui está uma captura de tela da interface principal da aplicação:
 
 <div style="display: flex; flex-direction: 'row'; align-items: 'center';">
-    <img src="images/app1.png" width="325px">
-</div>
-<div style="display: flex; flex-direction: 'row'; align-items: 'center';">
-    <img src="appcomplete.png" width="325px">
+    <img src="images/appcomplete.png" width="325px">
 </div>
 
 ## Principais Funcionalidades
