@@ -23,13 +23,22 @@ Aqui está uma captura de tela da interface principal da aplicação:
     <img src="images/appcomplete.png" width="325px">
 </div>
 
+Notificações:
+
+
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+    <img src="images/playing.png" width="225px" alt="Playing">
+    <img src="images/pause.png" width="225px" alt="Pause">
+</div>
+
+
 ## Principais Funcionalidades
 
 *   **Reprodução de Áudio:** Reproduz arquivos de áudio MP3.
 *   **Controles de Reprodução:** Inclui funcionalidades de reproduzir, pausar e parar.
 *   **Serviço em Segundo Plano:** Utiliza um `AudioService` para lidar com a reprodução em segundo plano.
 *   **Equalização (Futuro):** Pretende implementar um equalizador de 5 bandas (atualmente não totalmente implementado).
-*   **Notificação Persistente:** Exibe uma notificação persistente com controles básicos de reprodução (reproduzir/pausar/parar).
+*   **Notificação Persistente:** Exibe uma notificação persistente com status básicos da reprodução (tocando/pausado).
 *   **Comunicação AIDL:** Utiliza AIDL para comunicar entre a Activity e o Serviço.
 *   **Seek Bar:** Permite avançar ou retroceder na faixa de áudio.
 *   **Controle de Volume:** Permite ajustar o volume da reprodução.
