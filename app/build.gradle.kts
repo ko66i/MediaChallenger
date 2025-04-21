@@ -1,12 +1,21 @@
+import java.io.File
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
+
 android {
     namespace = "com.example.mediachallenger"
     compileSdk = 35
+
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
 
     defaultConfig {
         applicationId = "com.example.mediachallenger"
@@ -16,6 +25,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            cmake {
+                arguments.add("-DANDROID_STL=c++_shared")
+                cppFlags.add("-std=c++11")
+                cppFlags.add("-fexceptions")
+               // cppFlags.remove("-nostdinc++")
+            }
+        }
     }
 
     buildTypes {
@@ -25,8 +43,38 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            externalNativeBuild {
+                cmake {
+                    //Don't need to declare it here again, is declared on the externalNativeBuild
+                }
+            }
+        }
+
+        debug {
+            externalNativeBuild {
+                cmake {
+                    //Don't need to declare it here again, is declared on the externalNativeBuild
+                }
+            }
+        }
+
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = File("src/main/jni/CMakeLists.txt")
+            version = "3.31.6"
         }
     }
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
+
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
