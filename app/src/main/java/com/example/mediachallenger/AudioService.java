@@ -240,6 +240,16 @@ public class AudioService extends Service implements PlaybackInterface {
 
     }
 
+    private void applyAudioEqualization(short[] audioData, int[] gains) {
+        if (equalizationModule != null) {
+            equalizationModule.applyEqualization(audioData, gains);
+        } else {
+            Log.w("AudioService", "AudioEqualizer não inicializado");
+        }
+    }
+
+
+
     /**
      * Método chamado quando um cliente se conecta ao serviço.
      * @param intent Intent utilizada para conectar ao serviço.
@@ -258,7 +268,32 @@ public class AudioService extends Service implements PlaybackInterface {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notification notification = notificationModule.createNotification("Emixer App", "Ajustando áudio em segundo plano"); // Cria a notificação
         startForeground(NOTIFICATION_ID, notification); // Inicia o serviço em primeiro plano
+
+        // Código de teste para a equalização
+        if (equalizationModule != null) {
+            // short[] audioData = new short[1024]; // Dados de áudio
+            int[] gains = {1000, 1200, 800, 1100, 900}; // Ganhos para 5 bandas
+            //  short[] audioData = new short[1024]; // Dados de áudio
+
+            // Create the getAudioData method on EqualizationModule.java
+            short[] audioData = equalizationModule.getAudioData(mediaPlayer);
+
+            // Aplica a equalização
+            equalizationModule.applyEqualization(audioData, gains);
+
+            // Imprima alguns valores do audioData após a equalização (apenas para teste)
+            for (int i = 0; i < 5; i++) {
+                  Log.d("AudioService", "audioData[" + i + "] = " + audioData[i]);
+                }
+        } else {
+            Log.w("AudioService", "EqualizationModule não inicializado");
+        }
+
+
+
+
         return START_STICKY; // Retorna START_STICKY
+
     }
 
     /**
