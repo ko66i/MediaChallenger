@@ -11,6 +11,7 @@ import com.example.mediachallenger.databinding.ActivityMainBinding
 import android.os.RemoteException
 import androidx.lifecycle.Observer
 import com.airbnb.lottie.LottieAnimationView
+import com.example.mediachallenger.notification.NotificationModule
 
 /**
  * Activity principal da aplicação, responsável por controlar a interface do usuário
@@ -24,6 +25,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var audioManager: AudioManager // Objeto para interagir com as funcionalidades de áudio do serviço
     private lateinit var audioSettingsManager: AudioSettingsManager // Objeto para gerenciar as configurações dos botões de controle de áudio
     val trackListBottomSheetDialog = BottomSheetTrackList()
+
+
+    // Notification-related variables
+    private val CHANNEL_ID = "emixer_service_channel"
+    private val NOTIFICATION_ID = 1
+    private lateinit var notificationModule: NotificationModule
+
 
     /**
      * Handler e Runnable para atualizar a SeekBar de progresso da música.
@@ -64,6 +72,12 @@ class MainActivity : AppCompatActivity() {
 
         aidlServiceManager = AidlServiceManager(this) // Inicializa o gerenciador de serviço AIDL
         permissionManager = PermissionManager(this, this) // Inicializa o gerenciador de permissões
+
+
+        // Initialize the NotificationModule
+        notificationModule = NotificationModule(this, CHANNEL_ID, NOTIFICATION_ID)
+        notificationModule.createNotificationChannel() // Ensure the notification channel is created
+
 
         // Encontra as SeekBars no layout
         val seekBar = binding.seekBar
@@ -181,6 +195,8 @@ class MainActivity : AppCompatActivity() {
                     playAudio = {
                         try {
                             service.playAudio()
+                            val notification = notificationModule.createNotification("Media Player", "Tocando")
+                            notificationModule.showNotification(notification)
                         } catch (e: RemoteException) {
                             Log.e("MainActivity", "RemoteException: ${e.message}")
                         }
@@ -188,6 +204,8 @@ class MainActivity : AppCompatActivity() {
                     pauseAudio = {
                         try {
                             service.pauseAudio()
+                            val notification = notificationModule.createNotification("Media Player", "Pausado")
+                            notificationModule.showNotification(notification)
                         } catch (e: RemoteException) {
                             Log.e("MainActivity", "RemoteException: ${e.message}")
                         }
@@ -196,6 +214,7 @@ class MainActivity : AppCompatActivity() {
                         try {
                             service.stopAudio()
                             binding.seekBar.progress = 0
+                            notificationModule.showNotification(notificationModule.createNotification("Media Player", "Parado"))
                         } catch (e: RemoteException) {
                             Log.e("MainActivity", "RemoteException: ${e.message}")
                         }

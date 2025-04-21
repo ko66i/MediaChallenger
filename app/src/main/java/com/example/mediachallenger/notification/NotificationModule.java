@@ -64,4 +64,15 @@ public class NotificationModule implements NotificationInterface {
                 .setPriority(NotificationCompat.PRIORITY_LOW); // Define a prioridade
         return builder.build(); // Constrói a notificação
     }
+
+    /**
+     * Exibe a notificação.
+     * @param notification A notificação a ser exibida.
+     */
+    public void showNotification(Notification notification) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(notificationId, notification);
+        }
+    }
 }
