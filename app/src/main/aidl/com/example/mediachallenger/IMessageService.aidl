@@ -4,6 +4,7 @@ package com.example.mediachallenger;
 // Declare any non-default types here with import statements
 
 interface IMessageService {
+
        boolean playAudio();
        boolean pauseAudio();
        boolean stopAudio();
@@ -11,7 +12,6 @@ interface IMessageService {
        int getDuration();
        int getCurrentPosition();
        boolean setVolume(float volume);
-       boolean setAudioResource(String resourceName); 
-
+       boolean setAudioResource(String resourceName);
 
 }

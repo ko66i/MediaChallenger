@@ -31,7 +31,7 @@ android {
                 arguments.add("-DANDROID_STL=c++_shared")
                 cppFlags.add("-std=c++11")
                 cppFlags.add("-fexceptions")
-               // cppFlags.remove("-nostdinc++")
+                // cppFlags.remove("-nostdinc++")
             }
         }
     }
@@ -86,12 +86,13 @@ android {
         compose = true
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
         buildConfig = true
-        aidl=true
+        aidl = true
     }
 }
+
 
 dependencies {
 
@@ -106,13 +107,25 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.lottie)
     implementation(libs.material)
-    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.engine)
+
+    testImplementation(libs.robolectric)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.androidx.test.core)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 
 
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform() // Isso garante que o Gradle sabe para usar JUnit 5
 }
