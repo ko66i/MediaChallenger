@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
 
 import com.example.mediachallenger.R;
@@ -19,10 +20,12 @@ public class NotificationModule implements NotificationInterface {
     private String channelId; // ID do canal de notificação
     private int notificationId; // ID da notificação
 
+
     /**
      * Construtor da classe.
-     * @param context O contexto da aplicação.
-     * @param channelId O ID do canal de notificação.
+     *
+     * @param context        O contexto da aplicação.
+     * @param channelId      O ID do canal de notificação.
      * @param notificationId O ID da notificação.
      */
     public NotificationModule(Context context, String channelId, int notificationId) {
@@ -49,24 +52,31 @@ public class NotificationModule implements NotificationInterface {
         }
     }
 
+    // Criação do builder para Notificações - Serve para desacomplar a criaçao de notification para facilitar os Unit Tests
+    public Notification createNotification(String title, String text) {
+        return buildCompatNotification(title, text);
+    }
+
     /**
      * Cria uma notificação com o título e texto especificados.
+     *
      * @param title O título da notificação.
-     * @param text O texto da notificação.
+     * @param text  O texto da notificação.
      * @return A notificação criada.
      */
-    @Override
-    public Notification createNotification(String title, String text) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId) // Cria o NotificationCompat.Builder
-                .setSmallIcon(R.drawable.circle_users_adapter) // Define o ícone
-                .setContentTitle(title) // Define o título
-                .setContentText(text) // Define o texto
-                .setPriority(NotificationCompat.PRIORITY_LOW); // Define a prioridade
-        return builder.build(); // Constrói a notificação
+    protected Notification buildCompatNotification(String title, String text) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(R.drawable.circle_users_adapter)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+
+        return builder.build();
     }
 
     /**
      * Exibe a notificação.
+     *
      * @param notification A notificação a ser exibida.
      */
     public void showNotification(Notification notification) {

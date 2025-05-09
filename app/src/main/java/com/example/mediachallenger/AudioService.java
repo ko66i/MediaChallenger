@@ -8,12 +8,15 @@ import android.media.audiofx.Equalizer;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 
 import com.example.mediachallenger.equalization.EqualizationModule;
 import com.example.mediachallenger.notification.NotificationModule;
 import com.example.mediachallenger.playback.PlaybackInterface;
 import com.example.mediachallenger.playback.PlaybackModule;
+
+import java.util.Objects;
 
 /**
  * Serviço para gerenciar a reprodução de áudio e a equalização.
@@ -30,15 +33,28 @@ public class AudioService extends Service implements PlaybackInterface {
     private EqualizationModule equalizationModule; // Objeto EqualizationModule para controlar o equalizador
     private NotificationModule notificationModule; // Objeto NotificationModule para gerenciar as notificações
 
-    private MediaPlayer mediaPlayer; // MediaPlayer para reproduzir áudio
-    private Equalizer equalizer; // Equalizador para ajustar o áudio
+    public MediaPlayer mediaPlayer; // MediaPlayer para reproduzir áudio
+    public Equalizer equalizer; // Equalizador para ajustar o áudio
 
+    /**
+     * Criação de um connector para desacomplar o IMessageService e facilitar os units tests.
+     *
+     * Como o AIDL é um serviço de baixo nível se torna extremamente dificil mockar e simular ele.
+     * Ambiente de teste. Para isso foi criado um connector e inicializado ele. Assim tornando possível
+     * os testes no serviço de audio.
+     */
+    private final IMessageServiceConnector connector;
+    public AudioService() {
+        this.connector = new DefaultMessageService();
+    }
+    public AudioService(IMessageServiceConnector customConnector) {
+        this.connector = Objects.requireNonNullElseGet(customConnector, DefaultMessageService::new);
+    }
 
-    // Implementação do Binder para a interface IMessageService
-    private final IMessageService.Stub binder = new IMessageService.Stub() {
+    private class DefaultMessageService implements IMessageServiceConnector {
 
         @Override
-        public boolean playAudio() throws RemoteException {
+        public boolean playAudio() {
             Log.e("MSGRECEIVED", "Play audio"); // Log para depuração
             try {
                 if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
@@ -56,7 +72,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public boolean pauseAudio() throws RemoteException {
+        public boolean pauseAudio() {
             Log.d("MSGRECEIVED", "Pause audio"); // Log para depuração
             try {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
@@ -72,7 +88,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public boolean stopAudio() throws RemoteException {
+        public boolean stopAudio() {
             Log.d("MSGRECEIVED", "Stop audio"); // Log para depuração
             try {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
@@ -90,7 +106,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public boolean seekAudio(int position) throws RemoteException {
+        public boolean seekAudio(int position) {
             Log.d("MSGRECEIVED", "Seek audio to position: " + position); // Log para depuração
             try {
                 if (mediaPlayer != null) {
@@ -107,7 +123,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public int getDuration() throws RemoteException {
+        public int getDuration() {
             try {
                 if (mediaPlayer != null) {
                     return mediaPlayer.getDuration(); // Obtém a duração
@@ -122,7 +138,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public int getCurrentPosition() throws RemoteException {
+        public int getCurrentPosition() {
             try {
                 if (mediaPlayer != null) {
                     return mediaPlayer.getCurrentPosition(); // Obtém a posição atual
@@ -137,7 +153,7 @@ public class AudioService extends Service implements PlaybackInterface {
         }
 
         @Override
-        public boolean setVolume(float volume) throws RemoteException {
+        public boolean setVolume(float volume) {
             try {
                 if (mediaPlayer != null) {
                     mediaPlayer.setVolume(volume, volume); // Define o volume para os canais esquerdo e direito
@@ -157,10 +173,9 @@ public class AudioService extends Service implements PlaybackInterface {
          *
          * @param resourceName Nome do recurso de áudio a ser reproduzido.
          * @return true se o recurso foi definido com sucesso, false caso contrário.
-         * @throws RemoteException Exceção lançada em caso de erro de comunicação remota.
          */
         @Override
-        public boolean setAudioResource(String resourceName) throws RemoteException {
+        public boolean setAudioResource(String resourceName) {
             Log.d("MSGRECEIVED", "Set audio resource: " + resourceName); // Log for debugging
             try {
                 int audioResId;
@@ -197,7 +212,69 @@ public class AudioService extends Service implements PlaybackInterface {
             }
         }
 
-    };
+    }
+
+
+    /**
+     * Método chamado quando um cliente se conecta ao serviço.
+     *
+     * @param intent Intent utilizada para conectar ao serviço.
+     * @return O Binder para comunicação com o serviço.
+     */
+    @Override
+    public IBinder onBind(Intent intent) {
+        return new IMessageService.Stub() {
+            @Override
+            public boolean playAudio() throws RemoteException {
+                // Chama play baseado no conector, que comunica a lógica de serviço.
+                return connector.playAudio();
+            }
+
+            @Override
+            public boolean pauseAudio() throws RemoteException {
+                // Pausa a reprodução através do conector.
+                return connector.pauseAudio();
+            }
+
+            @Override
+            public boolean stopAudio() throws RemoteException {
+                // Para a reprodução e reseta o estado pelo conector.
+                return connector.stopAudio();
+            }
+
+            @Override
+            public boolean seekAudio(int position) throws RemoteException {
+                // Realiza a busca e reposicionamento via conector.
+                return connector.seekAudio(position);
+            }
+
+            @Override
+            public int getDuration() throws RemoteException {
+                // Obtém a duração da faixa atual via conector.
+                return connector.getDuration();
+            }
+
+            @Override
+            public int getCurrentPosition() throws RemoteException {
+                // Informa a posição atual na reprodução.
+                return connector.getCurrentPosition();
+            }
+
+            @Override
+            public boolean setVolume(float volume) throws RemoteException {
+                // Ajusta o volume via conector.
+                return connector.setVolume(volume);
+            }
+
+            @Override
+            public boolean setAudioResource(String resourceName) throws RemoteException {
+                // Define o recurso de áudio a ser tocado.
+                return connector.setAudioResource(resourceName);
+            }
+
+            // Outros métodos delegados para `connector`
+        };
+    }
 
     /**
      * Método chamado quando o serviço é criado.
@@ -248,19 +325,6 @@ public class AudioService extends Service implements PlaybackInterface {
         }
     }
 
-
-
-    /**
-     * Método chamado quando um cliente se conecta ao serviço.
-     * @param intent Intent utilizada para conectar ao serviço.
-     * @return O Binder para comunicação com o serviço.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind() chamado, intent: " + intent); // Log para depuração
-        return binder; // Retorna o Binder
-    }
-
     /**
      * Método chamado quando o serviço é iniciado.
      */
@@ -283,13 +347,11 @@ public class AudioService extends Service implements PlaybackInterface {
 
             // Imprima alguns valores do audioData após a equalização (apenas para teste)
             for (int i = 0; i < 5; i++) {
-                  Log.d("AudioService", "audioData[" + i + "] = " + audioData[i]);
-                }
+                Log.d("AudioService", "audioData[" + i + "] = " + audioData[i]);
+            }
         } else {
             Log.w("AudioService", "EqualizationModule não inicializado");
         }
-
-
 
 
         return START_STICKY; // Retorna START_STICKY
@@ -354,5 +416,60 @@ public class AudioService extends Service implements PlaybackInterface {
     @Override
     public boolean setVolume(float volume) {
         return playbackModule.setVolume(volume); // Delega para o PlaybackModule
+    }
+
+
+    interface IMessageServiceConnector {
+        /**
+         * Inicia a reprodução de áudio.
+         *
+         * @return true se a reprodução for iniciada com sucesso; false caso contrário.
+         */
+        boolean playAudio();
+        /**
+         * Pausa a reprodução de áudio, se estiver atualmente tocando.
+         *
+         * @return true se a reprodução for pausada com sucesso; false caso contrário.
+         */
+        boolean pauseAudio();
+        /**
+         * Para a reprodução de áudio e redefine o estado.
+         *
+         * @return true se a reprodução for parada com sucesso; false caso contrário.
+         */
+        boolean stopAudio();
+        /**
+         * Busca para uma posição específica na faixa de áudio.
+         *
+         * @param position A posição em milissegundos para buscar.
+         * @return true se a operação de busca for bem-sucedida; false caso contrário.
+         */
+        boolean seekAudio(int position);
+        /**
+         * Obtém a duração total da faixa de áudio atual.
+         *
+         * @return A duração em milissegundos.
+         */
+        int getDuration();
+        /**
+         * Obtém a posição atual na faixa de áudio.
+         *
+         * @return A posição atual em milissegundos.
+         */
+        int getCurrentPosition();
+        /**
+         * Define o volume do áudio.
+         *
+         * @param volume O novo volume, onde 0.0 é mudo e 1.0 é o volume máximo.
+         * @return true se o volume for definido com sucesso; false caso contrário.
+         */
+        boolean setVolume(float volume);
+        /**
+         * Define o recurso de áudio que será reproduzido.
+         *
+         * @param resourceName O nome do recurso de áudio a ser definido.
+         * @return true se o recurso for definido com sucesso; false caso contrário.
+         */
+        boolean setAudioResource(String resourceName);
     }
 }
