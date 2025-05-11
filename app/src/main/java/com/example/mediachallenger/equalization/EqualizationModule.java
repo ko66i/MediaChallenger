@@ -143,4 +143,3 @@ public class EqualizationModule implements EqualizationInterface {
         return audioData;
     }
 }
-
