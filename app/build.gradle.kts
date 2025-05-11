@@ -84,6 +84,7 @@ android {
             excludes += ("META-INF/ASL2.0") // Licença Apache
             excludes += ("META-INF/*.txt") // Pode pegar LICENSE.txt, NOTICE.txt, etc.
             excludes += ("META-INF/*.kotlin_module") // Comum em projetos Kotlin com várias libs
+            excludes += ("META-INF/LICENSE-notice.md")
         }
     }
 
