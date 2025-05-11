@@ -34,6 +34,7 @@ android {
                 // cppFlags.remove("-nostdinc++")
             }
         }
+
     }
 
     buildTypes {
@@ -121,10 +122,10 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.lottie)
     implementation(libs.material)
+
     implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.engine)
-
     testImplementation(libs.robolectric)
     androidTestImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.jupiter.engine)
