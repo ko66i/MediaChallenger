@@ -26,14 +26,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Configurações específicas para builds que usam código nativo com CMake
         externalNativeBuild {
             cmake {
-                arguments.add("-DANDROID_STL=c++_shared")
-                cppFlags.add("-std=c++11")
-                cppFlags.add("-fexceptions")
-                // cppFlags.remove("-nostdinc++")
+                // Argumentos passados para o CMake durante a compilação
+                arguments.add("-DANDROID_STL=c++_shared")  // Usa a STL compartilhada no Android NDK
+
+                // Flags extras de compilação em C++ para o compilador
+                cppFlags.add("-std=c++11")                 // Define o padrão C++11 para o código nativo
+                cppFlags.add("-fexceptions")                // Habilita tratamento de exceções em código C++
             }
         }
+
 
     }
 
@@ -64,7 +68,9 @@ android {
 
     externalNativeBuild {
         cmake {
+            // Define o caminho para o arquivo CMakeLists.txt que gerencia a build do código nativo
             path = File("src/main/jni/CMakeLists.txt")
+            // Especifica a versão do CMake a ser utilizada para compilar o código nativo
             version = "3.31.6"
         }
     }
@@ -111,35 +117,41 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.lottie)
-    implementation(libs.material)
+        // Dependências essenciais para o funcionamento do app
+        implementation(libs.androidx.core.ktx)               // Extensões Kotlin para APIs AndroidX Core
+        implementation(libs.androidx.lifecycle.runtime.ktx)  // Components Lifecycle para gerenciar ciclo de vida com Kotlin
+        implementation(libs.androidx.activity.compose)       // Suporte para atividades usando Jetpack Compose
+        implementation(platform(libs.androidx.compose.bom))  // BOM para sincronizar versões das bibliotecas Compose
+        implementation(libs.androidx.ui)                      // Biblioteca principal da UI do Jetpack Compose
+        implementation(libs.androidx.ui.graphics)             // Recursos gráficos para Jetpack Compose
+        implementation(libs.androidx.ui.tooling.preview)      // Ferramentas para preview layouts no Android Studio
+        implementation(libs.androidx.material3)                // Material Design 3 para Compose
+        implementation(libs.androidx.appcompat)                // Compatibilidade retroativa para componentes Android
+        implementation(libs.lottie)                            // Animações JSON vetoriais com suporte Lottie
+        implementation(libs.material)                          // Componentes Material Design (para Views tradicionais)
 
-    implementation(libs.androidx.junit.ktx)
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.robolectric)
-    androidTestImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.androidx.test.core)
+        // Dependências para testes unitários e instrumentados
+        implementation(libs.androidx.junit.ktx)               // Extensões JUnit para AndroidX
+        testImplementation(libs.junit.jupiter.api)            // API JUnit 5 para escrever testes
+        testImplementation(libs.junit.jupiter.engine)         // Motor de execução para JUnit 5
+        testImplementation(libs.robolectric)                  // Testes offline simulando ambiente Android
+        androidTestImplementation(libs.junit.jupiter)          // JUnit 5 para testes instrumentados no dispositivo
+        testRuntimeOnly(libs.junit.jupiter.engine)            // Motor JUnit 5 para tempo de execução dos testes
+        testImplementation(libs.mockito.kotlin)                // Mocking para testes usando Mockito com extensão Kotlin
+        testImplementation(libs.androidx.test.core)            // Núcleo para testes AndroidX
 
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    testImplementation(kotlin("test"))
+        // Dependências para testes instrumentados (rodando em dispositivo/emulador)
+        androidTestImplementation(libs.androidx.junit)         // Suporte para JUnit em testes instrumentados
+        androidTestImplementation(libs.androidx.espresso.core) // Framework para testes UI Espresso
+        androidTestImplementation(platform(libs.androidx.compose.bom)) // BOM para compor versões de dependências Compose em testes
+        androidTestImplementation(libs.androidx.ui.test.junit4)          // Integração Compose UI com JUnit4 para testes instrumentados
 
+        // Dependências específicas para builds de debug (exclusivas no modo debug)
+        debugImplementation(libs.androidx.ui.tooling)          // Ferramentas de debug para UI Compose
+        debugImplementation(libs.androidx.ui.test.manifest)    // Utilitários para testes para debug no Compose
+
+        // Teste padrão Kotlin
+        testImplementation(kotlin("test"))                      // Biblioteca padrão de testes do Kotlin
 
 }
 
