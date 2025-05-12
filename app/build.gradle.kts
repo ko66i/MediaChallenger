@@ -83,14 +83,13 @@ android {
     packagingOptions {
         resources {
             // Exclui arquivos específicos dentro da pasta META-INF que causam conflitos
-            // O erro mencionou 'META-INF/LICENSE.md', então vamos excluir esse e alguns outros comuns
             excludes += ("META-INF/LICENSE.md")
-            excludes += ("META-INF/LICENSE") // Geralmente existe uma versão sem a extensão .md também
+            excludes += ("META-INF/LICENSE")
             excludes += ("META-INF/NOTICE.md")
             excludes += ("META-INF/NOTICE")
-            excludes += ("META-INF/ASL2.0") // Licença Apache
-            excludes += ("META-INF/*.txt") // Pode pegar LICENSE.txt, NOTICE.txt, etc.
-            excludes += ("META-INF/*.kotlin_module") // Comum em projetos Kotlin com várias libs
+            excludes += ("META-INF/ASL2.0")
+            excludes += ("META-INF/*.txt")
+            excludes += ("META-INF/*.kotlin_module")
             excludes += ("META-INF/LICENSE-notice.md")
         }
     }
