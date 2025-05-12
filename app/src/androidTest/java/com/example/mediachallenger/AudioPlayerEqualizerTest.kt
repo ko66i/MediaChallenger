@@ -38,20 +38,15 @@ class AudioPlayerEqualizerTest {
 
         val initialAudioData = shortArrayOf(100, 200)
         val gains = intArrayOf() // Array de ganhos vazio
-
         val audioDataToProcess = initialAudioData.copyOf()
 
         // Calcule o esperado: se não há ganhos, o loop interno no C++ não roda.
-        // O array de áudio NÃO deve ser modificado pela função nativa.
         val expectedAudioData = initialAudioData.copyOf() // Espera-se que seja igual ao original
 
         // Act
         // Chamando o método applyEqualization que chama o nativo.
-        // Pela sua implementação Java, ele tem um check para gains.length == 0 e retorna cedo.
-        // Isso significa que a chamada nativa applyEqualizationNative *não* ocorrerá.
         // O teste verifica o comportamento do método wrapper applyEqualization.
         equalizationModule.applyEqualization(audioDataToProcess, gains)
-
 
         // Assert
         // Verificar se o array de áudio permanece inalterado.
@@ -60,12 +55,6 @@ class AudioPlayerEqualizerTest {
             audioDataToProcess,
             "O array de áudio não deve ser modificado quando não há ganhos (wrapper não chama nativo)."
         )
-
-        // Nota: Se você modificar o método applyEqualization no EqualizationModule
-        // para *sempre* chamar o nativo, mesmo com arrays vazios, e testar o retorno,
-        // o retorno esperado da função nativa C++ com gains vazios seria o numSamples
-        // original (pois o loop j não roda). O teste precisaria ser ajustado para isso.
-
 
         println("Teste testApplyEqualizationNative_zeroGains executado e passou!")
     }

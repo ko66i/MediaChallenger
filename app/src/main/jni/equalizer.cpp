@@ -5,8 +5,10 @@
 
 #include <cmath>
 
-extern "C" JNIEXPORT jint JNICALL Java_com_example_mediachallenger_equalization_EqualizationModule_applyEqualizationNative(JNIEnv *env, jobject thiz, jshortArray audioData, jintArray gains){
-
+extern "C" JNIEXPORT jint JNICALL Java_com_example_mediachallenger_equalization_EqualizationModule_applyEqualizationNative(JNIEnv *env,
+                                                                                                                           jobject,
+                                                                                                                           jshortArray audioData,
+                                                                                                                           jintArray gains){
     //Recuperando os dados
     jshort* audioDataPtr = env->GetShortArrayElements(audioData, 0);
     jint* gainsPtr = env->GetIntArrayElements(gains, 0);
